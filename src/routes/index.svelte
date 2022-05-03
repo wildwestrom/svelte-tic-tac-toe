@@ -3,36 +3,46 @@
 	import { Team } from '$lib/common';
 	import CellGraphic from '$lib/components/CellGraphic.svelte';
 
+	// Turn Count
+	let turnCount = 0
+	function countTurn() {
+		turnCount = turnCount + 1
+	}
+
 	// Current Player State
 	let currentPlayer: Player = { team: Team.Team_X };
 	function togglePlayer() {
-		if (currentPlayer.team == Team.Team_X) {
-			currentPlayer.team = Team.Team_O;
-		} else if (currentPlayer.team == Team.Team_O) {
-			currentPlayer.team = Team.Team_X;
-		} else {
-			console.log("I'm not expecting this to fail, but here's what would happen if it did.");
+		if (currentPlayer.team == Team.Team_X){
+			currentPlayer.team = Team.Team_O
+		} else if (currentPlayer.team == Team.Team_O){
+			currentPlayer.team = Team.Team_X
 		}
 	}
 
 	let cells = new Array(9).fill({ ownedBy: Team.Nobody }) as Cell[];
+	function captureCell(index: number){
+		cells[index].ownedBy = currentPlayer.team
+		cells = [...cells]
+		togglePlayer()
+		countTurn()
+	}
 
 	// Sanity check
 	$: {
-		console.log(currentPlayer, cells);
+		console.log("Cells:", cells);
 	}
 </script>
 
 <main>
 	<div class="container">
 		<div class="cells">
-			{#each cells as cell, index ((cell.index = index))}
-				<CellGraphic on:click={togglePlayer} {cell} {currentPlayer} />
+			{#each cells as cell, i}
+				<CellGraphic on:click={()=>{captureCell(i)}} {cell} {i}/>
 			{/each}
 		</div>
 		<br />
 		<p>Player {currentPlayer.team}'s Turn</p>
-		<button on:click={togglePlayer}>Toggle Player Turn</button>
+		<p>Turn #{turnCount}</p>
 	</div>
 </main>
 
@@ -40,7 +50,8 @@
 	.container {
 		padding: 1rem;
 		margin: 1rem;
-		width: 300px;
+		width: 500px;
+		height: 500px;
 	}
 	.cells {
 		display: grid;
